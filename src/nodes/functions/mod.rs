@@ -14,12 +14,7 @@ impl ToString for Call {
     fn to_string(&self) -> String {
         match self {
             Call::Intrinsic(name, args) | Call::Fun(name, args) => format!(
-                "<{}:{} {}>",
-                if matches!(self, Call::Fun(_, _)) {
-                    "fun"
-                } else {
-                    "intr"
-                },
+                "({} {})",
                 name,
                 args.iter()
                     .map(|e| e.to_string())
@@ -38,6 +33,13 @@ pub enum Exp {
     Atom(String),
     Str(String),
     Call(Call),
+}
+
+impl Exp {
+    pub fn call_intr<S: Into<String>>(name: S, args: Vec<Exp>) -> Exp {
+        let x = name.into();
+        Exp::Call(Call::Intrinsic(x, args))
+    }
 }
 
 impl ToString for Exp {
@@ -70,5 +72,19 @@ pub struct Function {
 impl Function {
     pub fn new(name: String, args: Vec<Arg>, body: Progn) -> Self {
         Self { name, args, body }
+    }
+}
+
+impl ToString for Function {
+    fn to_string(&self) -> String {
+        format!(
+            "<fun:{} {}>",
+            self.name,
+            self.args
+                .iter()
+                .map(|e| e.name.to_string())
+                .collect::<Vec<String>>()
+                .join(" ")
+        )
     }
 }

@@ -118,7 +118,6 @@ impl<'a> Intrinsic<'a> for Print {
                 .collect::<Vec<String>>()
                 .join(" ")
         );
-        print!("{}", result);
         Node::s(result)
     }
 }

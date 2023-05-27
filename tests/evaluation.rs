@@ -63,3 +63,22 @@ fn that_we_can_print_things() {
         Node::s("420 hello")
     )
 }
+
+#[test]
+fn that_we_can_nest_expressions() {
+    assert_eq!(
+        evaluate(
+            Node::call_intr(
+                "+",
+                vec![
+                    100.0.into(),
+                    Exp::call_intr("-", vec![Exp::Num(42.0), Exp::Num(22.0)]),
+                    200.0.into()
+                ]
+            ),
+            &mut NodeEnv::new(),
+            &Intrs::new().base(),
+        ),
+        (320.0).into()
+    );
+}

@@ -20,6 +20,19 @@ pub enum Node {
     Call(Call),
 }
 
+impl ToString for Node {
+    fn to_string(&self) -> String {
+        match self {
+            Node::Nothing => todo!(),
+            Node::Fun(v) => v.to_string(),
+            Node::Intrinsic(i) => i.to_string(),
+            Node::Exp(e) => e.to_string(),
+            Node::Call(c) => c.to_string(),
+            Node::Mod() => todo!(),
+        }
+    }
+}
+
 pub type NodeEnv = Env<Node>;
 
 impl From<Exp> for Node {
