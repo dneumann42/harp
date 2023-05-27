@@ -9,7 +9,6 @@ use crate::nodes::{
 
 pub fn evaluate(node: Node, env: &mut NodeEnv, intrs: &Intrs) -> Node {
     match node {
-        Node::Exp(exp) => todo!(),
         Node::Call(Call::Intrinsic(name, args)) => {
             let mut evaluated_args: Vec<Exp> = vec![];
             for arg in args {

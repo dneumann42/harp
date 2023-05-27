@@ -14,12 +14,12 @@ use super::{
 // to have them eval so we can make it lazy.
 
 pub trait Intrinsic<'a> {
-    fn name(&self) -> &'static str;
+    fn name(&self) -> String;
     fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node;
 }
 
 pub struct Intrs<'a> {
-    intrs: HashMap<&'static str, Box<dyn Intrinsic<'a>>>,
+    intrs: HashMap<String, Box<dyn Intrinsic<'a>>>,
 }
 
 impl<'a> Intrs<'a> {
@@ -40,13 +40,13 @@ impl<'a> Intrs<'a> {
     }
 
     pub fn base(self) -> Self {
-        self.intr(Version {})
+        self.intr(Version {}).intr(Add {}).intr(Sub {})
     }
 
     pub fn matches(&self, name: &str, env: &mut NodeEnv, args: &Vec<Exp>) -> Node {
         self.intrs
             .iter()
-            .find(|(x, _)| x.to_owned().to_owned() == name)
+            .find(|(_, v)| v.name() == name)
             .map_or(Node::Nothing, |(_, v)| v.call(args, env))
     }
 }
@@ -65,11 +65,39 @@ struct Sub;
 struct Echo;
 
 impl<'a> Intrinsic<'a> for Version {
-    fn name(&self) -> &'static str {
-        "version"
+    fn name(&self) -> String {
+        "version".to_owned()
     }
 
     fn call(&self, _: &Vec<Exp>, _: &mut NodeEnv) -> Node {
         Node::Exp(Exp::Atom("(harp v0.0.0#dev)".to_owned()))
+    }
+}
+
+impl<'a> Intrinsic<'a> for Add {
+    fn name(&self) -> String {
+        "+".to_owned()
+    }
+
+    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+        let mut result = 0.0;
+        for arg in args {
+            result += arg.as_num();
+        }
+        result.into()
+    }
+}
+
+impl<'a> Intrinsic<'a> for Sub {
+    fn name(&self) -> String {
+        "-".to_owned()
+    }
+
+    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+        let mut result = args[0].as_num();
+        for arg in &args[1..] {
+            result -= arg.as_num();
+        }
+        result.into()
     }
 }

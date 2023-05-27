@@ -40,9 +40,68 @@ impl From<Call> for Node {
     }
 }
 
+impl From<f64> for Node {
+    fn from(value: f64) -> Self {
+        Node::n(value)
+    }
+}
+
+impl From<f64> for Exp {
+    fn from(value: f64) -> Self {
+        Exp::Num(value)
+    }
+}
+
+impl From<Exp> for f64 {
+    fn from(value: Exp) -> Self {
+        match value {
+            Exp::Num(v) => v,
+            Exp::Bol(v) if v => 1.0,
+            _ => 0.0,
+        }
+    }
+}
+
+impl Exp {
+    fn as_num(&self) -> f64 {
+        match self {
+            Exp::Num(n) => *n,
+            Exp::Bol(v) if *v => 1.0,
+            _ => 0.0,
+        }
+    }
+}
+
+impl From<Node> for f64 {
+    fn from(value: Node) -> Self {
+        match value {
+            Node::Exp(Exp::Bol(b)) if b => 1.0,
+            _ => 0.0,
+        }
+    }
+}
+
+impl From<bool> for Node {
+    fn from(value: bool) -> Self {
+        if value {
+            Node::t()
+        } else {
+            Node::f()
+        }
+    }
+}
+
 impl Node {
     pub const fn n(v: f64) -> Self {
         Node::Exp(Exp::Num(v))
+    }
+
+    pub const fn t() -> Self {
+        Self::Exp(Exp::Bol(true))
+    }
+
+    pub const fn f() -> Self {
+        Self::Exp(Exp::Bol(false))
     }
 
     pub fn call_intr<S: Into<String>>(name: S, args: Vec<Exp>) -> Node {
@@ -50,11 +109,7 @@ impl Node {
     }
 
     pub fn as_num(v: Node) -> f64 {
-        match v {
-            Node::Exp(Exp::Num(n)) => n,
-            Node::Exp(Exp::Bol(b)) if b => 1.0,
-            _ => 0.0,
-        }
+        v.into()
     }
 
     pub fn as_bool(b: Node) -> bool {
