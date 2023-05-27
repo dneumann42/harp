@@ -1,11 +1,12 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Call {
     Intrinsic(String, Vec<Exp>),
     Fun(String, Vec<Exp>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Exp {
+    Nothing,
     Num(f64),
     Atom(String),
     Call(Call),
@@ -13,12 +14,12 @@ pub enum Exp {
 
 pub type Progn = Vec<Exp>;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Arg {
     name: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Function {
     name: String,
     args: Vec<Arg>,
