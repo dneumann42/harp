@@ -1,7 +1,33 @@
+use std::fmt::Display;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Call {
     Intrinsic(String, Vec<Exp>),
     Fun(String, Vec<Exp>),
+}
+
+fn repr<T>(_: &T) -> String {
+    format!("{}", std::any::type_name::<T>())
+}
+
+impl ToString for Call {
+    fn to_string(&self) -> String {
+        match self {
+            Call::Intrinsic(name, args) | Call::Fun(name, args) => format!(
+                "<{}:{} {}>",
+                if matches!(self, Call::Fun(_, _)) {
+                    "fun"
+                } else {
+                    "intr"
+                },
+                name,
+                args.iter()
+                    .map(|e| e.to_string())
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -10,7 +36,21 @@ pub enum Exp {
     Num(f64),
     Bol(bool),
     Atom(String),
+    Str(String),
     Call(Call),
+}
+
+impl ToString for Exp {
+    fn to_string(&self) -> String {
+        match self {
+            Exp::Nothing => "nothing".to_owned(),
+            Exp::Num(v) => v.to_string(),
+            Exp::Bol(b) => b.to_string(),
+            Exp::Atom(a) => a.to_string(),
+            Exp::Call(c) => c.to_string(),
+            Exp::Str(s) => s.to_owned(),
+        }
+    }
 }
 
 pub type Progn = Vec<Exp>;

@@ -96,6 +96,10 @@ impl Node {
         Node::Exp(Exp::Num(v))
     }
 
+    pub fn s<S: ToString>(st: S) -> Node {
+        Node::Exp(Exp::Str(st.to_string()))
+    }
+
     pub const fn t() -> Self {
         Self::Exp(Exp::Bol(true))
     }

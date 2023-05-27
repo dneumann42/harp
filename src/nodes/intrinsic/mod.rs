@@ -40,7 +40,10 @@ impl<'a> Intrs<'a> {
     }
 
     pub fn base(self) -> Self {
-        self.intr(Version {}).intr(Add {}).intr(Sub {})
+        self.intr(Version {})
+            .intr(Add {})
+            .intr(Sub {})
+            .intr(Print {})
     }
 
     pub fn matches(&self, name: &str, env: &mut NodeEnv, args: &Vec<Exp>) -> Node {
@@ -62,7 +65,7 @@ impl<'a> Default for Intrs<'a> {
 struct Version;
 struct Add;
 struct Sub;
-struct Echo;
+struct Print;
 
 impl<'a> Intrinsic<'a> for Version {
     fn name(&self) -> String {
@@ -99,5 +102,23 @@ impl<'a> Intrinsic<'a> for Sub {
             result -= arg.as_num();
         }
         result.into()
+    }
+}
+
+impl<'a> Intrinsic<'a> for Print {
+    fn name(&self) -> String {
+        "print".to_owned()
+    }
+
+    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+        let result = format!(
+            "{}",
+            args.iter()
+                .map(Exp::to_string)
+                .collect::<Vec<String>>()
+                .join(" ")
+        );
+        print!("{}", result);
+        Node::s(result)
     }
 }

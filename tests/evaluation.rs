@@ -1,5 +1,5 @@
 use harp::{
-    evaluator::evaluate,
+    evaluator::{eval_node, evaluate},
     nodes::{
         functions::{Call, Exp},
         intrinsic::{Intrinsic, Intrs},
@@ -38,7 +38,7 @@ fn that_we_can_add_and_subtract() {
         evaluate(
             Node::call_intr("+", vec![100.0.into(), 200.0.into()]),
             &mut NodeEnv::new(),
-            &Intrs::new().base().intr(Test {}),
+            &Intrs::new().base(),
         ),
         300.0.into()
     );
@@ -47,8 +47,19 @@ fn that_we_can_add_and_subtract() {
         evaluate(
             Node::call_intr("-", vec![300.0.into(), 200.0.into()]),
             &mut NodeEnv::new(),
-            &Intrs::new().base().intr(Test {}),
+            &Intrs::new().base(),
         ),
         100.0.into()
+    )
+}
+
+#[test]
+fn that_we_can_print_things() {
+    assert_eq!(
+        eval_node(Node::call_intr(
+            "print",
+            vec![420.0.into(), Exp::Str("hello".to_string())]
+        )),
+        Node::s("420 hello")
     )
 }

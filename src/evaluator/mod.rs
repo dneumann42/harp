@@ -17,9 +17,16 @@ pub fn evaluate(node: Node, env: &mut NodeEnv, intrs: &Intrs) -> Node {
                     _ => panic!("Expected expression."),
                 }
             }
-            intrs.matches(&name, env, &evaluated_args)
+            match intrs.matches(&name, env, &evaluated_args) {
+                Node::Nothing => panic!("Failed to find intrinsic '{}', have you added it?", name),
+                v => v,
+            }
         }
         Node::Call(Call::Fun(name, args)) => todo!(),
         node => node,
     }
+}
+
+pub fn eval_node(node: Node) -> Node {
+    evaluate(node, &mut NodeEnv::new(), &Intrs::new().base())
 }
