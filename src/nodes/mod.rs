@@ -1,9 +1,6 @@
-use std::collections::binary_heap::Iter;
-
 use self::{
     environment::Env,
-    functions::{Call, Exp, Function},
-    intrinsic::Intrinsic,
+    functions::{Call, Exp, Function, Progn},
 };
 
 pub mod environment;
@@ -18,6 +15,7 @@ pub enum Node {
     Intrinsic(String),
     Exp(Exp),
     Call(Call),
+    Do(Progn),
 }
 
 impl ToString for Node {
@@ -28,6 +26,13 @@ impl ToString for Node {
             Node::Intrinsic(i) => i.to_string(),
             Node::Exp(e) => e.to_string(),
             Node::Call(c) => c.to_string(),
+            Node::Do(progn) => {
+                let mut result: Vec<String> = vec![];
+                for ele in progn {
+                    result.push(ele.to_string())
+                }
+                result.join(" ")
+            }
             Node::Mod() => todo!(),
         }
     }
