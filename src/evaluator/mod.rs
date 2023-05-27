@@ -15,7 +15,7 @@ pub fn evaluate(node: Node, env: &mut NodeEnv, intrs: &Intrs) -> Node {
             for arg in args {
                 match evaluate(arg.into(), env, &intrs) {
                     Node::Exp(ex) => evaluated_args.push(ex),
-                    _ => {}
+                    _ => panic!("Expected expression."),
                 }
             }
             intrs.matches(&name, env, &evaluated_args)

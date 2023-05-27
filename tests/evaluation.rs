@@ -7,7 +7,7 @@ use harp::{
     },
 };
 
-const RES1: Node = Node::Exp(Exp::Num(42.0));
+const RES1: Node = Node::n(42.0);
 
 struct Test;
 impl<'a> Intrinsic<'a> for Test {
@@ -24,7 +24,7 @@ impl<'a> Intrinsic<'a> for Test {
 fn that_we_can_create_intrinsics_outside_package() {
     assert_eq!(
         evaluate(
-            Node::Call(Call::Intrinsic("test".to_owned(), vec![])),
+            Node::call_intr("test", vec![]),
             &mut NodeEnv::new(),
             &Intrs::new().base().intr(Test {}),
         ),

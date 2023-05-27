@@ -8,6 +8,7 @@ pub enum Call {
 pub enum Exp {
     Nothing,
     Num(f64),
+    Bol(bool),
     Atom(String),
     Call(Call),
 }
