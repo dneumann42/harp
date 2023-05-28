@@ -1,3 +1,4 @@
+use serde_derive::{Deserialize, Serialize};
 use self::{
     environment::Env,
     functions::{Call, Exp, Function, Progn},
@@ -7,7 +8,7 @@ pub mod environment;
 pub mod functions;
 pub mod intrinsic;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Node {
     Nothing,
     Fun(Function),
@@ -33,6 +34,10 @@ impl Node {
 
     pub const fn f() -> Self {
         Self::Exp(Exp::Bol(false))
+    }
+
+    pub fn a<S: ToString>(s: S) -> Self {
+        Self::Exp(Exp::Atom(s.to_string()))
     }
 
     pub fn call_intr<S: Into<String>>(name: S, args: Vec<Node>) -> Node {

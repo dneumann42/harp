@@ -1,0 +1,17 @@
+[Exp.Dict.author.Exp]
+Str = ""
+
+[Exp.Dict.version.Exp]
+Atom = "v0.0.0"
+
+[Exp.Dict.path.Exp]
+Str = ""
+
+[Exp.Dict.cache_path.Exp]
+Str = ""
+
+[Exp.Dict.licence.Exp]
+Str = "MIT"
+
+[Exp.Dict.name.Exp]
+Atom = ""

@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+use serde_derive::{Deserialize, Serialize};
 use super::Node;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Call {
     Intrinsic(String, Vec<Node>),
     Fun(String, Vec<Node>),
@@ -21,7 +23,7 @@ impl ToString for Call {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum Exp {
     Nothing,
     Num(f64),
@@ -29,6 +31,7 @@ pub enum Exp {
     Atom(String),
     Str(String),
     List(Vec<Box<Node>>),
+    Dict(HashMap<String, Node>),
     Call(Call),
 }
 
@@ -57,18 +60,25 @@ impl ToString for Exp {
                         .join(" ")
                 )
             }
+            Exp::Dict(xs) => {
+                format!("#({})",
+                        xs.iter()
+                            .map(|(k, v)| format!("{} {}", k, v.to_string()))
+                            .collect::<Vec<String>>()
+                            .join("  "))
+            }
         }
     }
 }
 
 pub type Progn = Vec<Node>;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Arg {
     name: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Function {
     name: String,
     args: Vec<Arg>,
