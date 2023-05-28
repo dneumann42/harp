@@ -14,6 +14,7 @@ use eframe::glow::Context;
 use egui::{Color32, Direction, RichText, WidgetText};
 use serde_derive::{Deserialize, Serialize};
 use harp::project::Project;
+use crate::gui::config::{ConfigErr, HarpAppConfig};
 use crate::HarpAppState::NewProject;
 
 pub mod evaluator;
@@ -61,19 +62,6 @@ enum HarpAppState {
     NewProject(NewProjectState),
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-struct HarpAppConfig {
-    last_opened_projects: Vec<String>,
-}
-
-impl HarpAppConfig {
-    pub fn new() -> Self {
-        Self {
-            last_opened_projects: vec![]
-        }
-    }
-}
-
 impl From<NewProjectState> for HarpAppState {
     fn from(value: NewProjectState) -> Self {
         HarpAppState::NewProject(value)
@@ -101,28 +89,17 @@ impl HarpApplication {
         }
     }
 
-    pub fn save_cfg(&self) {
-        match HarpApplication::app_data_dir() {
-            None => {}
-            Some(path) => {
-                let s = toml::to_string(&self.config).unwrap();
-                write(path.join("config.toml"), s).unwrap()
-            }
-        }
+    pub fn save_cfg(&self) -> Result<(), ConfigErr> {
+        self.config.save()
     }
 
     pub fn load_cfg(&mut self) {
-        match HarpApplication::app_data_dir() {
-            None => {}
-            Some(path) => {
-                if path.join("config.toml").exists() {
-                    let contents = fs::read_to_string(path.join("config.toml")).unwrap();
-                    self.config = toml::from_str(&*contents.as_str()).unwrap();
-                    self.loaded = true
-                }
-                {
-                    self.save_cfg()
-                }
+        match HarpAppConfig::load() {
+            Ok(cfg) => {
+                self.config = cfg
+            }
+            Err(err) => {
+                panic!("{:?}", err)
             }
         }
     }
@@ -140,14 +117,6 @@ impl Default for HarpApplication {
 }
 
 impl eframe::App for HarpApplication {
-    fn save(&mut self, storage: &mut dyn Storage) {
-        self.save_cfg()
-    }
-
-    fn on_exit(&mut self, _gl: Option<&Context>) {
-        self.save_cfg();
-    }
-
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if !self.loaded {
             self.load_cfg();
@@ -160,10 +129,12 @@ impl eframe::App for HarpApplication {
                         ui.colored_label(Color32::LIGHT_GRAY, "Harp");
                         if ui.button("Open Project").clicked() {
                             if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                                let pr = Project::load_project(path.to_string_lossy().to_string());
+                                let spath = path.to_string_lossy().to_string();
+                                let pr = Project::load_project(&spath);
                                 self.project = Option::from(pr.clone());
                                 self.set_state(HarpAppState::Edit);
-                                self.config.last_opened_projects.push(path.to_string_lossy().to_string());
+                                self.config.add_project(&spath);
+                                let _ = self.config.save();
                             }
                         }
                         if ui.button("New Project").clicked() {
@@ -172,7 +143,7 @@ impl eframe::App for HarpApplication {
                         }
                         ui.colored_label(Color32::LIGHT_GRAY, "Recent Projects");
 
-                        for file in &self.config.last_opened_projects {
+                        for file in &self.config.projects() {
                             ui.horizontal(|ui| {
                                 ui.label(file);
                                 let _ = ui.button("Edit");
@@ -188,7 +159,7 @@ impl eframe::App for HarpApplication {
                     }
                     if state.is_submitted() {
                         let mut proj = Project::make(state.name(), state.path());
-                        self.config.last_opened_projects.push(proj.path());
+                        self.config.add_project(state.path());
                         proj.save();
                         self.project = Some(proj);
                         self.set_state(HarpAppState::Edit);
@@ -213,6 +184,17 @@ impl eframe::App for HarpApplication {
                 }
             }
         });
+    }
+
+    fn save(&mut self, storage: &mut dyn Storage) {
+        match self.save_cfg() {
+            Ok(_) => {}
+            Err(err) => panic!("{:?}", err)
+        }
+    }
+
+    fn on_exit(&mut self, _gl: Option<&Context>) {
+        self.save_cfg().expect("Failed to save.");
     }
 }
 

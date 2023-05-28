@@ -16,8 +16,8 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn load_project(path: String) -> Self {
-        Project::make("", &*path)
+    pub fn load_project(path: &String) -> Self {
+        Project::make("", path)
     }
 
     pub fn name(&self) -> String {
