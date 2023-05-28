@@ -1,11 +1,11 @@
-script     =  { SOI ~ expr* ~ EOI }
+script     =  { SOI ~ exp* ~ EOI }
 WHITESPACE = _{ " " | NEWLINE | "\t" }
 alpha      =  { 'a'..'z' | 'A'..'Z' }
 digit      =  { '0'..'9' }
 underscore =  { "_" }
-list       =  { "(" ~ expr* ~ ")" }
-array      =  { "[" ~ expr* ~ "]" }
-expr       =  { atom | number | boolean | string | list | array }
+list       =  { "(" ~ exp* ~ ")" }
+array      =  { "[" ~ exp* ~ "]" }
+exp        =  { atom | number | boolean | string | list | array }
 boolean    = @{ "#" ~ ("t" | "f" | "T" | "F") }
 char       = @{ alpha | underscore | SYMBOL | "*" | "-" | "/" }
 atom       = @{ char+ ~ (char | digit)* | char }

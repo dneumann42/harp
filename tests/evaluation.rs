@@ -1,10 +1,11 @@
 use harp::{
     evaluator::{eval_node, evaluate},
     nodes::{
-        functions::{Call, Exp},
+        functions::Exp,
         intrinsic::{Intrinsic, Intrs},
         Node, NodeEnv,
     },
+    reader::read,
 };
 
 const RES1: Node = Node::n(42.0);
@@ -15,7 +16,7 @@ impl<'a> Intrinsic<'a> for Test {
         "test".to_owned()
     }
 
-    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+    fn call(&self, _args: &Vec<Exp>, _env: &mut NodeEnv) -> Node {
         RES1
     }
 }
@@ -58,7 +59,7 @@ fn that_we_can_print_things() {
     assert_eq!(
         eval_node(Node::call_intr(
             "print",
-            vec![420.0.into(), Exp::Str("hello".to_string())]
+            vec![420.0.into(), Node::s("hello")]
         )),
         Node::s("420 hello")
     )
@@ -72,7 +73,7 @@ fn that_we_can_nest_expressions() {
                 "+",
                 vec![
                     100.0.into(),
-                    Exp::call_intr("-", vec![Exp::Num(42.0), Exp::Num(22.0)]),
+                    Node::call_intr("-", vec![Node::n(42.0), Node::n(22.0)]),
                     200.0.into()
                 ]
             ),
@@ -81,4 +82,11 @@ fn that_we_can_nest_expressions() {
         ),
         (320.0).into()
     );
+}
+
+#[test]
+fn that_add_sub() {
+    let exp = read("(+ 1 (- 7 5) 3)").unwrap();
+    let res = evaluate(exp, &mut NodeEnv::new(), &Intrs::new().base());
+    assert_eq!(res, Node::n(6.0));
 }

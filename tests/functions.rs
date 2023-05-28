@@ -1,9 +1,4 @@
-use harp::nodes::{
-    environment::Env,
-    functions::{Exp, Function, Progn},
-    intrinsic::Intrinsic,
-    Node,
-};
+use harp::nodes::{environment::Env, functions::Function, Node};
 
 #[test]
 fn that_we_can_define_functions() {
@@ -11,7 +6,7 @@ fn that_we_can_define_functions() {
 
     env.add("+", Node::Intrinsic("+".to_string()));
 
-    let fun = Function::new("".to_owned(), vec![], vec![]);
+    let _fun = Function::new("".to_owned(), vec![], vec![]);
 
     assert!(true)
 }

@@ -1,11 +1,7 @@
-use std::{
-    collections::{HashMap, HashSet},
-    vec,
-};
+use std::collections::HashMap;
 
 use super::{
-    environment::Env,
-    functions::{Arg, Exp},
+    functions::{Exp},
     Node, NodeEnv,
 };
 
@@ -82,7 +78,7 @@ impl<'a> Intrinsic<'a> for Add {
         "+".to_owned()
     }
 
-    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+    fn call(&self, args: &Vec<Exp>, _env: &mut NodeEnv) -> Node {
         let mut result = 0.0;
         for arg in args {
             result += arg.as_num();
@@ -96,7 +92,7 @@ impl<'a> Intrinsic<'a> for Sub {
         "-".to_owned()
     }
 
-    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+    fn call(&self, args: &Vec<Exp>, _env: &mut NodeEnv) -> Node {
         let mut result = args[0].as_num();
         for arg in &args[1..] {
             result -= arg.as_num();
@@ -110,7 +106,7 @@ impl<'a> Intrinsic<'a> for Print {
         "print".to_owned()
     }
 
-    fn call(&self, args: &Vec<Exp>, env: &mut NodeEnv) -> Node {
+    fn call(&self, args: &Vec<Exp>, _env: &mut NodeEnv) -> Node {
         let result = format!(
             "{}",
             args.iter()

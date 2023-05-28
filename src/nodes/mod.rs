@@ -18,6 +18,40 @@ pub enum Node {
     Do(Progn),
 }
 
+impl Node {
+    pub const fn n(v: f64) -> Self {
+        Node::Exp(Exp::Num(v))
+    }
+
+    pub fn s<S: ToString>(st: S) -> Node {
+        Node::Exp(Exp::Str(st.to_string()))
+    }
+
+    pub const fn t() -> Self {
+        Self::Exp(Exp::Bol(true))
+    }
+
+    pub const fn f() -> Self {
+        Self::Exp(Exp::Bol(false))
+    }
+
+    pub fn call_intr<S: Into<String>>(name: S, args: Vec<Node>) -> Node {
+        Node::Call(Call::Intrinsic(name.into(), args))
+    }
+
+    pub fn as_num(v: Node) -> f64 {
+        v.into()
+    }
+
+    pub fn as_bool(b: Node) -> bool {
+        match b {
+            Node::Nothing => false,
+            Node::Exp(Exp::Bol(v)) if !v => false,
+            _ => true,
+        }
+    }
+}
+
 impl ToString for Node {
     fn to_string(&self) -> String {
         match self {
@@ -105,40 +139,6 @@ impl From<bool> for Node {
             Node::t()
         } else {
             Node::f()
-        }
-    }
-}
-
-impl Node {
-    pub const fn n(v: f64) -> Self {
-        Node::Exp(Exp::Num(v))
-    }
-
-    pub fn s<S: ToString>(st: S) -> Node {
-        Node::Exp(Exp::Str(st.to_string()))
-    }
-
-    pub const fn t() -> Self {
-        Self::Exp(Exp::Bol(true))
-    }
-
-    pub const fn f() -> Self {
-        Self::Exp(Exp::Bol(false))
-    }
-
-    pub fn call_intr<S: Into<String>>(name: S, args: Vec<Exp>) -> Node {
-        Node::Call(Call::Intrinsic(name.into(), args))
-    }
-
-    pub fn as_num(v: Node) -> f64 {
-        v.into()
-    }
-
-    pub fn as_bool(b: Node) -> bool {
-        match b {
-            Node::Nothing => false,
-            Node::Exp(Exp::Bol(v)) if !v => false,
-            _ => true,
         }
     }
 }

@@ -1,13 +1,9 @@
-use std::fmt::Display;
+use super::Node;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Call {
-    Intrinsic(String, Vec<Exp>),
-    Fun(String, Vec<Exp>),
-}
-
-fn repr<T>(_: &T) -> String {
-    format!("{}", std::any::type_name::<T>())
+    Intrinsic(String, Vec<Node>),
+    Fun(String, Vec<Node>),
 }
 
 impl ToString for Call {
@@ -32,11 +28,12 @@ pub enum Exp {
     Bol(bool),
     Atom(String),
     Str(String),
+    List(Vec<Box<Node>>),
     Call(Call),
 }
 
 impl Exp {
-    pub fn call_intr<S: Into<String>>(name: S, args: Vec<Exp>) -> Exp {
+    pub fn call_intr<S: Into<String>>(name: S, args: Vec<Node>) -> Exp {
         let x = name.into();
         Exp::Call(Call::Intrinsic(x, args))
     }
@@ -51,11 +48,20 @@ impl ToString for Exp {
             Exp::Atom(a) => a.to_string(),
             Exp::Call(c) => c.to_string(),
             Exp::Str(s) => s.to_owned(),
+            Exp::List(xs) => {
+                format!(
+                    "({})",
+                    xs.iter()
+                        .map(|s| s.to_string())
+                        .collect::<Vec<String>>()
+                        .join(" ")
+                )
+            }
         }
     }
 }
 
-pub type Progn = Vec<Exp>;
+pub type Progn = Vec<Node>;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Arg {

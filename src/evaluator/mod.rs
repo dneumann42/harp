@@ -1,14 +1,19 @@
-use std::collections::HashSet;
-
 use crate::nodes::{
-    environment::Env,
     functions::{Call, Exp},
     intrinsic::Intrs,
     Node, NodeEnv,
 };
 
+pub fn evaluate_do(xs: Vec<Node>, env: &mut NodeEnv, intrs: &Intrs) -> Node {
+    xs.iter()
+        .map(|x| evaluate(x.clone(), env, intrs))
+        .last()
+        .unwrap_or(Node::Nothing)
+}
+
 pub fn evaluate(node: Node, env: &mut NodeEnv, intrs: &Intrs) -> Node {
     match node {
+        Node::Do(xs) => evaluate_do(xs, env, intrs),
         Node::Call(Call::Intrinsic(name, args)) => {
             let evaluated_args: Vec<Exp> = args
                 .into_iter()
