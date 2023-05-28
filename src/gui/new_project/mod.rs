@@ -31,8 +31,8 @@ impl NewProjectState {
     }
 }
 
-pub fn new_project(ui: &mut Ui, state: NewProjectState) -> NewProjectState {
-    let mut state = state;
+pub fn new_project(ui: &mut Ui, state: &NewProjectState) -> NewProjectState {
+    let mut state = state.to_owned();
     ui.centered_and_justified(|ui| {
         ui.vertical(|ui| {
             ui.horizontal(|ui| {

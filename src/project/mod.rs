@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fs;
 use std::fs::{create_dir_all, File, read_to_string, write};
 use std::io::Write;
 use std::path::PathBuf;
@@ -9,12 +10,16 @@ use serde_derive::{Deserialize, Serialize};
 use crate::nodes::functions::Exp;
 use crate::nodes::Node;
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Project {
     config: Node,
 }
 
 impl Project {
+    pub fn load_project(path: String) -> Self {
+        Project::make("", &*path)
+    }
+
     pub fn name(&self) -> String {
         match &self.config {
             Node::Exp(Exp::Dict(cfg)) => {
@@ -31,6 +36,11 @@ impl Project {
             }
             _ => "".to_string()
         }
+    }
+
+    pub fn files(&self) -> Vec<String> {
+        let xs: Vec<_> = fs::read_dir(self.project_dir()).unwrap().map(|x| x.unwrap()).collect();
+        xs.iter().map(|x| x.path().to_string_lossy().to_string()).collect()
     }
 
     pub fn path_buf(&self) -> PathBuf {

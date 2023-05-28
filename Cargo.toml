@@ -10,7 +10,7 @@ pest = "*"
 pest_derive = "*"
 directories = "5.0"
 rustyline = "11.0.0"
-egui = "*"
+egui = { version = "*", features = ["persistence"] }
 eframe = "*"
 rfd = "0.11.4"
 toml = "0.7.4"
