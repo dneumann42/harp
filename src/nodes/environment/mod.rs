@@ -1,7 +1,15 @@
 use std::collections::HashMap;
+use serde_derive::{Deserialize, Serialize};
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Env<T: Clone> {
     stack: Vec<HashMap<String, T>>,
+}
+
+impl<T: Clone> Env<T> {
+    pub fn get_stack(&self) -> &Vec<HashMap<String, T>> {
+        &self.stack
+    }
 }
 
 impl<T: Clone> Env<T> {

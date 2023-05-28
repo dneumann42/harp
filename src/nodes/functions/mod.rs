@@ -94,13 +94,14 @@ impl Function {
 impl ToString for Function {
     fn to_string(&self) -> String {
         format!(
-            "<fun:{} {}>",
+            "(fun {} {} {})",
             self.name,
             self.args
                 .iter()
                 .map(|e| e.name.to_string())
                 .collect::<Vec<String>>()
-                .join(" ")
+                .join(" "),
+            ""
         )
     }
 }

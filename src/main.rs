@@ -13,6 +13,7 @@ use eframe::{egui, Storage};
 use eframe::glow::Context;
 use egui::{Color32, Direction, RichText, WidgetText};
 use serde_derive::{Deserialize, Serialize};
+use harp::project::explorer::{explorer_ui, ExplorerState};
 use harp::project::Project;
 use crate::gui::config::{ConfigErr, HarpAppConfig};
 use crate::HarpAppState::NewProject;
@@ -68,11 +69,11 @@ impl From<NewProjectState> for HarpAppState {
     }
 }
 
-#[derive(Clone)]
 struct HarpApplication {
     loaded: bool,
     config: HarpAppConfig,
     state: HarpAppState,
+    explorer_state: ExplorerState,
     project: Option<Project>,
 }
 
@@ -111,6 +112,7 @@ impl Default for HarpApplication {
             loaded: false,
             config: HarpAppConfig::new(),
             state: HarpAppState::Main,
+            explorer_state: ExplorerState::new(),
             project: None,
         }
     }
@@ -146,7 +148,12 @@ impl eframe::App for HarpApplication {
                         for file in &self.config.projects() {
                             ui.horizontal(|ui| {
                                 ui.label(file);
-                                let _ = ui.button("Edit");
+                                if ui.button("Edit").clicked() {
+                                    let pr = Project::load_project(file);
+                                    self.project = Option::from(pr.clone());
+                                    self.set_state(HarpAppState::Edit);
+                                }
+
                                 let _ = ui.button("...");
                             });
                         }
@@ -172,12 +179,7 @@ impl eframe::App for HarpApplication {
                         match &self.project {
                             None => {}
                             Some(proj) => {
-                                ui.label("Files:");
-                                ui.vertical(|ui| {
-                                    for file in &proj.files() {
-                                        let _ = ui.button(file);
-                                    }
-                                });
+                                explorer_ui(&mut self.explorer_state, &proj, ui);
                             }
                         }
                     });

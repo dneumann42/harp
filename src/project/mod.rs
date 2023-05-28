@@ -1,3 +1,8 @@
+pub mod explorer;
+mod function_editor;
+mod buffer;
+mod editor;
+
 use std::collections::HashMap;
 use std::fs;
 use std::fs::{create_dir_all, File, read_to_string, write};
@@ -7,11 +12,14 @@ use std::str::FromStr;
 use directories::BaseDirs;
 use rustyline::Config;
 use serde_derive::{Deserialize, Serialize};
-use crate::nodes::functions::Exp;
-use crate::nodes::Node;
+use crate::nodes::environment::Env;
+use crate::nodes::functions::{Arg, Exp, Function, Progn};
+use crate::nodes::{Node, NodeEnv};
+use crate::nodes::Node::Fun;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Project {
+    env: NodeEnv,
     config: Node,
 }
 
@@ -38,9 +46,24 @@ impl Project {
         }
     }
 
+    pub fn env(&self) -> &NodeEnv {
+        &self.env
+    }
+
     pub fn files(&self) -> Vec<String> {
         let xs: Vec<_> = fs::read_dir(self.project_dir()).unwrap().map(|x| x.unwrap()).collect();
         xs.iter().map(|x| x.path().to_string_lossy().to_string()).collect()
+    }
+
+    pub fn create_function_node(
+        &mut self,
+        name: String,
+        args: Vec<Arg>,
+        body: Progn,
+    ) -> Node {
+        let fun = Node::fun(Function::new(name, args, body));
+        // self.env().add(&name, fun);
+        fun.clone()
     }
 
     pub fn path_buf(&self) -> PathBuf {
@@ -112,7 +135,8 @@ impl Project {
                 cfg.insert("name".to_string(), Node::a(name));
                 cfg.insert("path".to_string(), Node::s(path));
                 Self {
-                    config: Node::Exp(Exp::Dict(cfg.clone()))
+                    env: Env::new(),
+                    config: Node::Exp(Exp::Dict(cfg.clone())),
                 }
             }
             _ => panic!()
@@ -123,6 +147,7 @@ impl Project {
 impl Default for Project {
     fn default() -> Self {
         Self {
+            env: Env::new(),
             config: Project::default_config(),
         }
     }
