@@ -55,17 +55,6 @@ impl Project {
         xs.iter().map(|x| x.path().to_string_lossy().to_string()).collect()
     }
 
-    pub fn create_function_node(
-        &mut self,
-        name: String,
-        args: Vec<Arg>,
-        body: Progn,
-    ) -> Node {
-        let fun = Node::fun(Function::new(name, args, body));
-        // self.env().add(&name, fun);
-        fun.clone()
-    }
-
     pub fn path_buf(&self) -> PathBuf {
         PathBuf::from_str(self.path().as_str()).unwrap()
     }

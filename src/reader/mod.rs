@@ -16,8 +16,21 @@ pub struct HarpParser;
 pub enum ParseErr {
     Never,
     Eof,
+    ExpectedFunction(String),
     ExpectedAtom(String),
     ParseNumberError(String),
+}
+
+impl ToString for ParseErr {
+    fn to_string(&self) -> String {
+        match self {
+            ParseErr::Never => "never".to_string(),
+            ParseErr::Eof => "eof".to_string(),
+            ParseErr::ExpectedFunction(a) |
+            ParseErr::ExpectedAtom(a) |
+            ParseErr::ParseNumberError(a) => a.clone()
+        }
+    }
 }
 
 type Result<T> = std::result::Result<T, ParseErr>;
@@ -45,6 +58,36 @@ pub fn read<S: ToString>(code: S) -> Result<Node> {
             todo!()
         }
     }
+}
+
+// Reads a value directly
+pub fn read_node<S: ToString>(code: S) -> Result<Node> {
+    match HarpParser::parse(Rule::script, code.to_string().as_str()) {
+        Ok(rs) => {
+            match parse_rules(rs).map(unblock)? {
+                Node::Do(ndo) => {
+                    if ndo.len() > 0 {
+                        Ok(ndo[0].clone())
+                    } else {
+                        Err(ParseErr::Never)
+                    }
+                }
+                _ => {
+                    Err(ParseErr::Never)
+                }
+            }
+        }
+        Err(xs) => {
+            Err(ParseErr::ExpectedAtom(xs.to_string()))
+        }
+    }
+
+    // match x {
+    //     Node::Do(_) => {}
+    //     _ => {
+    //
+    //     }
+    // }
 }
 
 pub fn parse_rules(rs: Pairs<Rule>) -> Result<Node> {
@@ -89,11 +132,11 @@ pub fn parse_rule(r: Pair<Rule>) -> Result<Node> {
                     return Err(ParseErr::ExpectedAtom(format!(
                         "Error: expected atom to call but got '{:?}'",
                         &ns[0]
-                    )))
+                    )));
                 }
             }
 
-            Ok(Node::call_intr(
+            Ok(Node::call_fun(
                 ns[0].to_string(),
                 ns[1..].iter().map(|n| n.to_owned()).collect::<Vec<Node>>(),
             ))
@@ -120,7 +163,7 @@ pub fn parse_rule(r: Pair<Rule>) -> Result<Node> {
                 .map(|v| {
                     let x = v.into();
                     return x;
-                })
+                });
         }
         Rule::string => todo!(),
     };

@@ -48,12 +48,38 @@ impl Node {
         Self::Fun(fun)
     }
 
+    pub fn arg_list(&self) -> Vec<Node> {
+        match self {
+            Node::Fun(fun) => {
+                match fun.args.as_ref() {
+                    Node::Exp(Exp::List(xs)) => {
+                        let xs: Vec<Node> = xs.iter().map(|x| x.as_ref().clone()).collect();
+                        xs
+                    }
+                    _ => vec![]
+                }
+            }
+            _ => vec![]
+        }
+    }
+
     pub fn a<S: ToString>(s: S) -> Self {
         Self::Exp(Exp::Atom(s.to_string()))
     }
 
+    pub fn get_fun(self) -> Function {
+        match self {
+            Node::Fun(fun) => fun,
+            _ => panic!("Not a function")
+        }
+    }
+
     pub fn call_intr<S: Into<String>>(name: S, args: Vec<Node>) -> Node {
         Node::Call(Call::Intrinsic(name.into(), args))
+    }
+
+    pub fn call_fun<S: Into<String>>(name: S, args: Vec<Node>) -> Node {
+        Node::Call(Call::Fun(name.into(), args))
     }
 
     pub fn as_num(v: Node) -> f64 {

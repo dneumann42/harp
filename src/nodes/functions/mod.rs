@@ -8,6 +8,22 @@ pub enum Call {
     Fun(String, Vec<Node>),
 }
 
+impl Call {
+    pub fn as_fun(&self) -> Function {
+        match &self {
+            Call::Intrinsic(_, _) => panic!("Invalid"),
+            Call::Fun(name, args) => {
+                if args.len() > 2 {
+                    let a = args[1].clone();
+                    let b = args[1..].iter().map(|n| n.to_owned()).collect::<Vec<Node>>();
+                    let fun = Function::new(name.clone(), a, b);
+                }
+                todo!()
+            }
+        }
+    }
+}
+
 impl ToString for Call {
     fn to_string(&self) -> String {
         match self {
@@ -80,28 +96,32 @@ pub struct Arg {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Function {
-    name: String,
-    args: Vec<Arg>,
-    body: Progn,
+    pub name: String,
+    pub args: Box<Node>,
+    pub body: Progn,
 }
 
 impl Function {
-    pub fn new(name: String, args: Vec<Arg>, body: Progn) -> Self {
-        Self { name, args, body }
+    pub fn new(name: String, args: Node, body: Progn) -> Self {
+        Self { name, args: Box::new(args), body }
     }
 }
 
 impl ToString for Function {
     fn to_string(&self) -> String {
         format!(
-            "(fun {} {} {})",
+            "(fun {} ({}) {})",
             self.name,
             self.args
+                .arg_list()
                 .iter()
-                .map(|e| e.name.to_string())
+                .map(|e| e.to_string())
                 .collect::<Vec<String>>()
                 .join(" "),
-            ""
+            self.body.iter()
+                .map(|n| n.to_string())
+                .collect::<Vec<String>>()
+                .join(" ")
         )
     }
 }

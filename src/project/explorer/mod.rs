@@ -1,10 +1,12 @@
 use std::os::linux::raw::stat;
 use egui::{AboveOrBelow, Id, popup_above_or_below_widget, Ui, Window};
 use uuid::Uuid;
-use crate::nodes::functions::Function;
+use crate::nodes::functions::{Exp, Function};
+use crate::nodes::Node;
 use crate::project::buffer::{Buffer, View};
 use crate::project::function_editor::FunctionEditor;
 use crate::project::Project;
+use crate::reader::read;
 
 pub struct ExplorerState {
     function_editors: Vec<FunctionEditor>,
@@ -32,6 +34,16 @@ impl ExplorerState {
 pub fn explorer_ui(state: &mut ExplorerState, project: &Project, ui: &mut Ui) {
     state.update_function_editors(ui);
 
+    // Save functions
+    // for fun in state.function_editors {
+    // let code = read(fun.get_code());
+    //
+    // match code {
+    //     Ok(_) => {}
+    //     Err(_) => {}
+    // }
+    // }
+
     ui.label("Nodes:");
 
     let new_node_menu_id = ui.make_persistent_id("new-node-menu-id");
@@ -48,7 +60,11 @@ pub fn explorer_ui(state: &mut ExplorerState, project: &Project, ui: &mut Ui) {
             ui.vertical(|ui| {
                 if ui.button("Function").clicked() {
                     ui.memory_mut(|mem| mem.toggle_popup(new_node_menu_id));
-                    state.add_function_editor(ui.make_persistent_id(Uuid::new_v4()), None);
+                    state.add_function_editor(ui.make_persistent_id(Uuid::new_v4()), Some(Function::new(
+                        "demo".to_string(),
+                        Node::Exp(Exp::List(vec![])),
+                        vec![Node::n(42.0)],
+                    )));
                 }
 
                 if ui.button("Type").clicked() {
