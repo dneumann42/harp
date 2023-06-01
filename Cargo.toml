@@ -10,3 +10,18 @@ pest = "*"
 pest_derive = "*"
 directories = "5.0"
 rustyline = "11.0.0"
+egui = { version = "*", features = ["persistence"] }
+eframe = "*"
+rfd = "0.11.4"
+toml = "0.7.4"
+serde = "1.0.163"
+serde_derive = "1.0.163"
+serde_toml = "0.0.1"
+
+[dependencies.uuid]
+version = "1.3.3"
+features = [
+    "v4", # Lets you generate random UUIDs
+    "fast-rng", # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]

@@ -1,3 +1,4 @@
+use serde_derive::{Deserialize, Serialize};
 use self::{
     environment::Env,
     functions::{Call, Exp, Function, Progn},
@@ -7,7 +8,7 @@ pub mod environment;
 pub mod functions;
 pub mod intrinsic;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Node {
     Nothing,
     Fun(Function),
@@ -19,6 +20,14 @@ pub enum Node {
 }
 
 impl Node {
+    pub fn is_fun(&self) -> bool { matches!(self, Node::Fun(_)) }
+    pub fn is_mod(&self) -> bool { matches!(self, Node::Mod()) }
+    pub fn is_intrinsic(&self) -> bool { matches!(self, Node::Intrinsic(_)) }
+    pub fn is_exp(&self) -> bool { matches!(self, Node::Exp(_)) }
+    pub fn is_call(&self) -> bool { matches!(self, Node::Call(_)) }
+    pub fn is_num(&self) -> bool { matches!(self, Node::Exp(Exp::Num(_))) }
+    pub fn is_do(&self) -> bool { matches!(self, Node::Do(_)) }
+
     pub const fn n(v: f64) -> Self {
         Node::Exp(Exp::Num(v))
     }
@@ -35,8 +44,42 @@ impl Node {
         Self::Exp(Exp::Bol(false))
     }
 
+    pub fn fun(fun: Function) -> Self {
+        Self::Fun(fun)
+    }
+
+    pub fn arg_list(&self) -> Vec<Node> {
+        match self {
+            Node::Fun(fun) => {
+                match fun.args.as_ref() {
+                    Node::Exp(Exp::List(xs)) => {
+                        let xs: Vec<Node> = xs.iter().map(|x| x.as_ref().clone()).collect();
+                        xs
+                    }
+                    _ => vec![]
+                }
+            }
+            _ => vec![]
+        }
+    }
+
+    pub fn a<S: ToString>(s: S) -> Self {
+        Self::Exp(Exp::Atom(s.to_string()))
+    }
+
+    pub fn get_fun(self) -> Function {
+        match self {
+            Node::Fun(fun) => fun,
+            _ => panic!("Not a function")
+        }
+    }
+
     pub fn call_intr<S: Into<String>>(name: S, args: Vec<Node>) -> Node {
         Node::Call(Call::Intrinsic(name.into(), args))
+    }
+
+    pub fn call_fun<S: Into<String>>(name: S, args: Vec<Node>) -> Node {
+        Node::Call(Call::Fun(name.into(), args))
     }
 
     pub fn as_num(v: Node) -> f64 {
@@ -71,8 +114,6 @@ impl ToString for Node {
         }
     }
 }
-
-pub type NodeEnv = Env<Node>;
 
 impl From<Exp> for Node {
     fn from(value: Exp) -> Self {
@@ -142,3 +183,20 @@ impl From<bool> for Node {
         }
     }
 }
+
+pub type NodeEnv = Env<Node>;
+
+impl NodeEnv {
+    pub fn functions(&self) -> Vec<(String, Node)> {
+        let mut fs: Vec<(String, Node)> = vec![];
+        for scope in self.get_stack() {
+            for (s, n) in scope.iter() {
+                if n.is_intrinsic() || n.is_fun() {
+                    fs.push((s.to_owned(), n.to_owned()));
+                }
+            }
+        }
+        fs
+    }
+}
+
